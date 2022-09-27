@@ -1,5 +1,8 @@
-//#endregiontest test test
-#andrew how about you make it work already
-test
-ok
+// Using code from https://freshman.tech/calculator/
 
+const calculator = {
+    displayValue: '0',
+    firstOperand: null,
+    waitingForSecondOperand: false,
+    operator: null,
+  };

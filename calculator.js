@@ -7,38 +7,69 @@ const calculator = {
     operator: null,
   };
 
-function updateDisplay() {
-  const display = document.querySelector('.calculator-screen');
-  display.value = calculator.displayValue;
-}
-
-updateDisplay();
+  function updateDisplay() {
+    const display = document.querySelector('.calculator-screen');
+    display.value = calculator.displayValue;
+  }
+  
+  updateDisplay();
 
 const keys = document.querySelector('.calculator-keys');
-keys.addEventListener('click', (event) => {
-  const {target} = event;
+// keys.addEventListener('click', (event) => {
+//   const {target} = event;
 
+//   if (!target.matches('button')) {
+//     return;
+//   }
+
+//   if (target.classList.contains('operator')) {
+//     handleOperator(target.value);
+//     updateDisplay();
+//     return;
+//   }
+
+//   if (target.classList.contains('decimal')) {
+//     inputDecimal(target.value);
+//     updateDisplay();
+//   }
+
+//   if (target.classList.contains('all-clear')) {
+//     resetCalculator();
+//     updateDisplay();
+//     return;
+//   }
+
+//   inputDigit(target.value);
+//   updateDisplay();
+// });
+keys.addEventListener('click', event => {
+  const { target } = event;
+  const { value } = target;
   if (!target.matches('button')) {
     return;
   }
 
-  if (target.classList.contains('operator')) {
-    handleOperator(target.value);
-    updateDisplay();
-    return;
+  switch (value) {
+    case '+':
+    case '-':
+    case '*':
+    case '/':
+    case '=':
+      handleOperator(value);
+      break;
+    case '.':
+      inputDecimal(value);
+      break;
+    case 'all-clear':
+      resetCalculator();
+      break;
+    default:
+      // check if the key is an integer
+      if (Number.isInteger(parseFloat(value))) {
+        inputDigit(value);
+      }
   }
 
-  if (target.classList.contains('decimal')) {
-    inputDecimal(target.value);
-    updateDisplay();
-  }
-
-  if (target.classList.contains('all-clear')) {
-    console.log('clear', target.value);
-    return;
-  }
-
-  inputDigit(target.value);
   updateDisplay();
 });
 
@@ -56,6 +87,17 @@ function inputDigit(digit) {
 
   console.log(calculator);
 }
+function inputDecimal(dot) {
+  if (calculator.waitingForSecondOperand === true) {
+  	calculator.displayValue = '0.'
+    calculator.waitingForSecondOperand = false;
+    return
+  }
+
+  if (!calculator.displayValue.includes(dot)) {
+    calculator.displayValue += dot;
+  }
+}
 
 function handleOperator(nextOperator) {
   // Destructure the properties on the calculator object
@@ -63,16 +105,48 @@ function handleOperator(nextOperator) {
   // `parseFloat` converts the string contents of `displayValue`
   // to a floating-point number
   const inputValue = parseFloat(displayValue);
-
+  if (operator && calculator.waitingForSecondOperand)  {
+    calculator.operator = nextOperator;
+    console.log(calculator);
+    return;
+  }
   // verify that `firstOperand` is null and that the `inputValue`
   // is not a `NaN` value
   if (firstOperand === null && !isNaN(inputValue)) {
     // Update the firstOperand property
     calculator.firstOperand = inputValue;
+  } else if (operator) {
+    const result = calculate(firstOperand, inputValue, operator);
+
+    //calculator.displayValue = String(result);
+    calculator.displayValue = `${parseFloat(result.toFixed(7))}`;
+    calculator.firstOperand = result;
   }
 
   calculator.waitingForSecondOperand = true;
   calculator.operator = nextOperator;
 
+  console.log(calculator);
+}
+
+function calculate(firstOperand, secondOperand, operator) {
+  if (operator === '+') {
+    return firstOperand + secondOperand;
+  } else if (operator === '-') {
+    return firstOperand - secondOperand;
+  } else if (operator === '*') {
+    return firstOperand * secondOperand;
+  } else if (operator === '/') {
+    return firstOperand / secondOperand;
+  }
+
+  return secondOperand;
+}
+
+function resetCalculator() {
+  calculator.displayValue = '0';
+  calculator.firstOperand = null;
+  calculator.waitingForSecondOperand = false;
+  calculator.operator = null;
   console.log(calculator);
 }

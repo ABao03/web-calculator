@@ -45,18 +45,16 @@ keys.addEventListener('click', (event) => {
 const {target} = event;
 
 function inputDigit(digit) {
-  const { displayValue } = calculator;
-  // Overwrite `displayValue` if the current value is '0' otherwise append to it
-  calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
+  const { displayValue, waitingForSecondOperand } = calculator;
+
+  if (waitingForSecondOperand === true) {
+    calculator.displayValue = digit;
+    calculator.waitingForSecondOperand = false;
+  } else {
+    calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
+  }
 
   console.log(calculator);
-}
-function inputDecimal(dot) {
-  // If the `displayValue` property does not contain a decimal point
-  if (!calculator.displayValue.includes(dot)) {
-    // Append the decimal point
-    calculator.displayValue += dot;
-  }
 }
 
 function handleOperator(nextOperator) {
